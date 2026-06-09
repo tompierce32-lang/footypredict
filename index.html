@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Staff World Cup 2026 – Prediction League</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   :root {
     --green: #15803d; --green-bg: #dcfce7; --green-text: #14532d;
@@ -283,7 +284,7 @@
       <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
         <div>
           <div style="font-weight:600;font-size:14px">Cloud sync</div>
-          <div id="sync-status" style="font-size:12px;color:var(--muted);margin-top:2px">Not configured</div>
+          <div id="sync-status" style="font-size:12px;color:var(--muted);margin-top:2px">Connecting...</div>
         </div>
         <div style="display:flex;gap:6px">
           <button class="btn" onclick="openSetup()">⚙️ Configure</button>
@@ -329,6 +330,17 @@
     <!-- Player cards list -->
     <div style="font-weight:600;font-size:15px;margin-bottom:10px">👥 All entrants <span id="entrant-count" style="font-size:12px;color:var(--muted);font-weight:400"></span></div>
     <div id="admin-player-list"></div>
+
+    <!-- Backup to Excel -->
+    <div class="card" style="margin-bottom:14px;margin-top:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-weight:600;font-size:14px">📊 Backup to Excel</div>
+          <div style="font-size:12px;color:var(--muted);margin-top:2px">Downloads all players, predictions and results as an .xlsx file</div>
+        </div>
+        <button class="btn btn-primary" onclick="exportToExcel()" id="export-btn">⬇ Download backup</button>
+      </div>
+    </div>
 
     <!-- Bulk mark paid -->
     <details class="card" style="margin-bottom:12px;margin-top:14px">
@@ -571,20 +583,20 @@ let activePredPlayer = null;
 // ════════════════════════════════════════════════════════════
 // CLOUDFLARE SYNC
 // ════════════════════════════════════════════════════════════
+// ── Hardcoded config – no setup needed ──
+const WC_URL   = 'https://wc2026-api.tompierce32.workers.dev';
+const WC_TOKEN = 'BankView2026';
+
 function getCfg() {
-  return {
-    url: localStorage.getItem('wc_worker_url') || '',
-    token: localStorage.getItem('wc_api_token') || '',
-  };
+  return { url: WC_URL, token: WC_TOKEN };
 }
 function setCfg(url, token) {
-  localStorage.setItem('wc_worker_url', url);
-  localStorage.setItem('wc_api_token', token);
+  // No-op: config is hardcoded
 }
 
 async function syncData() {
   const { url, token } = getCfg();
-  if (!url) { toast('Configure cloud sync first', 'error'); openSetup(); return; }
+  // URL always set (hardcoded)
   setSyncDot('pending');
   try {
     // Always GET first to get latest
@@ -1227,6 +1239,151 @@ function importCSV() {
 }
 
 // ════════════════════════════════════════════════════════════
+// EXCEL EXPORT
+// ════════════════════════════════════════════════════════════
+function exportToExcel() {
+  const btn = document.getElementById('export-btn');
+  btn.textContent = '⏳ Preparing...';
+  btn.disabled = true;
+
+  try {
+    const wb = XLSX.utils.book_new();
+
+    // ── Sheet 1: Leaderboard ──
+    const lbData = [['Pos', 'Name', 'Team', 'Paid', 'Total Pts', 'Exact Scores', 'Correct Results', 'Predictions Entered']];
+    const ranked = state.players
+      .map(p => ({ ...p, ...playerScore(p), predCount: Object.keys(p.predictions||{}).length }))
+      .sort((a, b) => b.total - a.total);
+    ranked.forEach((p, i) => {
+      lbData.push([
+        i + 1,
+        p.name,
+        p.team,
+        p.paid ? 'Yes' : 'No',
+        p.total,
+        p.exact,
+        p.results,
+        p.predCount,
+      ]);
+    });
+    const lbSheet = XLSX.utils.aoa_to_sheet(lbData);
+    lbSheet['!cols'] = [
+      {wch:4},{wch:22},{wch:20},{wch:6},{wch:9},{wch:12},{wch:15},{wch:18}
+    ];
+    // Bold header row
+    const lbRange = XLSX.utils.decode_range(lbSheet['!ref']);
+    for (let C = lbRange.s.c; C <= lbRange.e.c; C++) {
+      const cell = lbSheet[XLSX.utils.encode_cell({r:0, c:C})];
+      if (cell) cell.s = { font: { bold: true } };
+    }
+    XLSX.utils.book_append_sheet(wb, lbSheet, 'Leaderboard');
+
+    // ── Sheet 2: All Predictions ──
+    // Header: Name | Team | Paid | [fixture cols...]
+    const fixCols = FIXTURES.map(f => `${f.home} v ${f.away} (${f.date})`);
+    const predHeader = ['Name', 'Team', 'Paid', 'Total Pts', ...fixCols];
+    const predData = [predHeader];
+    ranked.forEach(p => {
+      const row = [
+        p.name,
+        p.team,
+        p.paid ? 'Yes' : 'No',
+        p.total,
+      ];
+      FIXTURES.forEach(f => {
+        const pred = p.predictions && p.predictions[f.id];
+        row.push(pred ? `${pred.home}-${pred.away}` : '');
+      });
+      predData.push(row);
+    });
+    const predSheet = XLSX.utils.aoa_to_sheet(predData);
+    predSheet['!cols'] = [
+      {wch:22},{wch:20},{wch:6},{wch:9},
+      ...FIXTURES.map(() => ({wch:28}))
+    ];
+    XLSX.utils.book_append_sheet(wb, predSheet, 'All Predictions');
+
+    // ── Sheet 3: Results ──
+    const resData = [['#', 'Group', 'Date', 'Time', 'Home Team', 'Away Team', 'Home Goals', 'Away Goals', 'Result']];
+    FIXTURES.forEach(f => {
+      const r = state.results[f.id];
+      const resultStr = r ? (parseInt(r.home) > parseInt(r.away) ? f.home + ' Win' : parseInt(r.home) < parseInt(r.away) ? f.away + ' Win' : 'Draw') : '';
+      resData.push([
+        f.id,
+        'Group ' + f.g,
+        f.date,
+        f.time,
+        f.home,
+        f.away,
+        r ? r.home : '',
+        r ? r.away : '',
+        resultStr,
+      ]);
+    });
+    const resSheet = XLSX.utils.aoa_to_sheet(resData);
+    resSheet['!cols'] = [
+      {wch:4},{wch:8},{wch:8},{wch:7},{wch:20},{wch:20},{wch:11},{wch:11},{wch:16}
+    ];
+    XLSX.utils.book_append_sheet(wb, resSheet, 'Results');
+
+    // ── Sheet 4: Points breakdown ──
+    // One row per player per fixture showing their prediction, actual result and points
+    const bkData = [['Player', 'Team', 'Group', 'Date', 'Fixture', 'Predicted', 'Actual', 'Points']];
+    ranked.forEach(p => {
+      FIXTURES.forEach(f => {
+        const pred = p.predictions && p.predictions[f.id];
+        const r = state.results[f.id];
+        if (!pred && !r) return; // skip empty rows
+        const pts = calcPts(pred, r);
+        bkData.push([
+          p.name,
+          p.team,
+          'Group ' + f.g,
+          f.date,
+          `${f.home} v ${f.away}`,
+          pred ? `${pred.home}-${pred.away}` : '-',
+          r ? `${r.home}-${r.away}` : 'TBP',
+          pts !== null ? pts : '',
+        ]);
+      });
+    });
+    const bkSheet = XLSX.utils.aoa_to_sheet(bkData);
+    bkSheet['!cols'] = [
+      {wch:22},{wch:18},{wch:8},{wch:8},{wch:26},{wch:10},{wch:8},{wch:6}
+    ];
+    XLSX.utils.book_append_sheet(wb, bkSheet, 'Points Breakdown');
+
+    // ── Sheet 5: Payment summary ──
+    const payData = [['Name', 'Team', 'Paid', 'Amount Due']];
+    state.players.forEach(p => {
+      payData.push([p.name, p.team, p.paid ? 'Yes' : 'No', p.paid ? '£0' : '£3']);
+    });
+    const paid = state.players.filter(p=>p.paid).length;
+    const pot = paid * 3;
+    payData.push([]);
+    payData.push(['', '', 'Total collected:', `£${pot}`]);
+    payData.push(['', '', 'Outstanding:', `£${(state.players.length - paid) * 3}`]);
+    const paySheet = XLSX.utils.aoa_to_sheet(payData);
+    paySheet['!cols'] = [{wch:22},{wch:20},{wch:8},{wch:12}];
+    XLSX.utils.book_append_sheet(wb, paySheet, 'Payments');
+
+    // ── Download ──
+    const date = new Date().toISOString().slice(0,10);
+    XLSX.writeFile(wb, `WC2026_PredictionLeague_Backup_${date}.xlsx`);
+
+    btn.textContent = '✅ Downloaded!';
+    setTimeout(() => { btn.textContent = '⬇ Download backup'; btn.disabled = false; }, 2500);
+    toast('Excel backup downloaded ✓');
+
+  } catch(e) {
+    btn.textContent = '⬇ Download backup';
+    btn.disabled = false;
+    toast('Export failed: ' + e.message, 'error');
+    console.error(e);
+  }
+}
+
+// ════════════════════════════════════════════════════════════
 // UTILS
 // ════════════════════════════════════════════════════════════
 function esc(s) {
@@ -1253,8 +1410,8 @@ checkMode();
 render();
 showTab('standings');
 
-// Auto-sync on load if configured
-if (getCfg().url) syncData();
+// Auto-sync on load
+syncData();
 </script>
 </body>
 </html>
