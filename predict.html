@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enter Your Predictions – Staff World Cup 2026</title>
+<style>
+  :root {
+    --green: #064e3b; --green-light: #d1fae5; --green-text: #065f46;
+    --border: #e2e8f0; --bg: #f8fafc; --surface: #ffffff;
+    --text: #0f172a; --muted: #64748b; --faint: #f1f5f9;
+    --red-bg: #fee2e2; --red-text: #991b1b;
+    --amber-bg: #fef3c7; --amber-text: #92400e;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); font-size: 14px; min-height: 100vh; }
+
+  /* Header */
+  #header { background: #064e3b; color: white; padding: 18px 20px; text-align: center; }
+  #header h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  #header p { font-size: 13px; opacity: .75; }
+
+  /* Steps bar */
+  #steps { background: white; border-bottom: 1px solid var(--border); padding: 12px 20px; display: flex; gap: 0; justify-content: center; }
+  .step { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--muted); }
+  .step.active { color: var(--green); font-weight: 600; }
+  .step.done { color: #15803d; }
+  .step-num { width: 22px; height: 22px; border-radius: 50%; border: 2px solid currentColor; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; }
+  .step-done-icon { font-size: 13px; }
+  .step-divider { width: 32px; height: 2px; background: var(--border); margin: 0 6px; flex-shrink: 0; }
+  .step-divider.done { background: #15803d; }
+
+  /* Content */
+  #content { max-width: 680px; margin: 0 auto; padding: 20px 16px 60px; }
+
+  /* Cards */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; }
+
+  /* Form fields */
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: .5px; }
+  .field input { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 15px; color: #0f172a; background: #ffffff; }
+  .field input:focus { outline: 2px solid var(--green); border-color: transparent; }
+  .field-hint { font-size: 11px; color: var(--muted); margin-top: 4px; }
+
+  /* Group tabs */
+  .group-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+  .gtab { padding: 5px 13px; border: 1px solid var(--border); border-radius: 20px; cursor: pointer; font-size: 12px; background: white; color: var(--muted); font-weight: 500; }
+  .gtab.active { background: var(--green); color: white; border-color: var(--green); }
+  .gtab.has-preds { border-color: #15803d; color: #15803d; }
+  .gtab.has-preds.active { background: var(--green); color: white; }
+
+  /* Fixture rows */
+  .fx-table { width: 100%; border-collapse: collapse; }
+  .fx-table thead th { background: var(--faint); font-size: 11px; font-weight: 600; color: var(--muted); padding: 6px 8px; text-align: left; border-bottom: 1px solid var(--border); }
+  .fx-table tbody tr:hover td { background: #f8fafc; }
+  .fx-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .fx-team { font-weight: 500; font-size: 13px; }
+  .fx-meta { font-size: 10px; color: var(--muted); line-height: 1.3; }
+  .score-wrap { display: flex; align-items: center; gap: 4px; }
+  .score-box { width: 52px; padding: 5px 4px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; font-weight: 600; text-align: center; color: #0f172a; background: #ffffff; }
+  .score-box:focus { outline: 2px solid var(--green); border-color: transparent; }
+  .score-sep { font-size: 12px; color: var(--muted); font-weight: 700; }
+  .saved-tick { font-size: 14px; color: #15803d; margin-left: 4px; display: none; }
+
+  /* Progress bar */
+  .progress-wrap { margin-bottom: 16px; }
+  .progress-label { display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 5px; }
+  .progress-bar { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #15803d; border-radius: 3px; transition: width .3s; }
+
+  /* Buttons */
+  .btn { padding: 10px 22px; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; border: 1px solid var(--border); background: white; color: var(--text); }
+  .btn:hover { background: var(--faint); }
+  .btn-primary { background: var(--green); color: white; border-color: var(--green); font-size: 15px; padding: 12px 28px; }
+  .btn-primary:hover { background: #065f46; }
+  .btn-primary:disabled { opacity: .5; cursor: not-allowed; }
+
+  /* Screens */
+  .screen { display: none; }
+  .screen.active { display: block; }
+
+  /* Info box */
+  .info-box { background: var(--amber-bg); color: var(--amber-text); border-radius: 8px; padding: 10px 14px; font-size: 12px; margin-bottom: 14px; line-height: 1.5; }
+
+  /* Success screen */
+  #success-screen { text-align: center; padding: 40px 20px; }
+  #success-screen .big-tick { font-size: 64px; margin-bottom: 16px; }
+  #success-screen h2 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+  #success-screen p { font-size: 14px; color: var(--muted); margin-bottom: 20px; max-width: 400px; margin-left: auto; margin-right: auto; }
+
+  /* Sticky footer nav */
+  #footer-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid var(--border); padding: 10px 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; max-width: 680px; margin: 0 auto; }
+  #footer-spacer { height: 70px; }
+
+  /* Toast */
+  #toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #1e293b; color: white; padding: 8px 18px; border-radius: 8px; font-size: 13px; opacity: 0; transition: opacity .3s; pointer-events: none; white-space: nowrap; z-index: 99; }
+  #toast.show { opacity: 1; }
+  #toast.error { background: #dc2626; }
+
+  /* Config banner */
+  #config-banner { background: var(--red-bg); color: var(--red-text); padding: 10px 16px; font-size: 12px; text-align: center; display: none; }
+  #config-banner.show { display: block; }
+
+  @media (max-width: 480px) {
+    .fx-table thead th:first-child, .fx-table td:first-child { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div id="config-banner">⚠️ Worker URL not configured — predictions cannot be submitted. Contact the organiser.</div>
+
+<div id="header">
+  <div style="font-size:32px;margin-bottom:6px">⚽</div>
+  <h1>Staff World Cup 2026</h1>
+  <p>Prediction League · Entry £3 · Deadline: Thursday 11th June 2026, 8pm</p>
+</div>
+
+<div id="steps">
+  <div class="step active" id="step1-indicator">
+    <div class="step-num">1</div>
+    <span>Your details</span>
+  </div>
+  <div class="step-divider" id="div1"></div>
+  <div class="step" id="step2-indicator">
+    <div class="step-num">2</div>
+    <span>Predictions</span>
+  </div>
+  <div class="step-divider" id="div2"></div>
+  <div class="step" id="step3-indicator">
+    <div class="step-num">3</div>
+    <span>Submit</span>
+  </div>
+</div>
+
+<div id="content">
+
+  <!-- ── STEP 1: Details ── -->
+  <div class="screen active" id="screen-1">
+    <div class="card">
+      <div style="font-size:17px;font-weight:700;margin-bottom:4px">Your details</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:18px">Enter your name and a fun team name.</div>
+      <div class="field">
+        <label>Your full name</label>
+        <input type="text" id="p-name" placeholder="e.g. Sarah Johnson" autocomplete="name">
+        <div class="field-hint">Used to identify you on the leaderboard</div>
+      </div>
+      <div class="field">
+        <label>Team name</label>
+        <input type="text" id="p-team" placeholder="e.g. The Predictors">
+        <div class="field-hint">Give your entry a fun name!</div>
+      </div>
+    </div>
+    <div class="info-box">
+      💷 <strong>Entry fee: £3</strong> — please give your entry fee to Laura Caples by Thursday 11th June 2026. You can still submit your predictions now.
+    </div>
+    <div class="info-box" style="background:#dbeafe;color:#1e3a8a">
+      🏆 <strong>Scoring:</strong> Exact score = 5 pts · Correct result = 1 pt · Correct home goals = 1 pt · Correct away goals = 1 pt
+    </div>
+  </div>
+
+  <!-- ── STEP 2: Predictions ── -->
+  <div class="screen" id="screen-2">
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span>Predictions entered</span>
+        <span id="progress-text">0 / 72</span>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    </div>
+    <div class="info-box">
+      💡 You don't have to fill in every game — skip any you're unsure about. You can come back and resubmit to update your predictions before the deadline.
+    </div>
+    <div class="group-tabs" id="group-tabs"></div>
+    <div class="card" style="padding:0;overflow:hidden">
+      <table class="fx-table">
+        <thead>
+          <tr>
+            <th style="width:70px">Date</th>
+            <th>Fixture</th>
+            <th style="width:130px">Your prediction</th>
+          </tr>
+        </thead>
+        <tbody id="fx-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ── STEP 3: Review & Submit ── -->
+  <div class="screen" id="screen-3">
+    <div class="card">
+      <div style="font-size:17px;font-weight:700;margin-bottom:14px">Review & submit</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        <div style="background:var(--faint);border-radius:8px;padding:12px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:2px">NAME</div>
+          <div style="font-weight:600;font-size:15px" id="review-name">—</div>
+        </div>
+        <div style="background:var(--faint);border-radius:8px;padding:12px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:2px">TEAM</div>
+          <div style="font-weight:600;font-size:15px" id="review-team">—</div>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        <div style="background:var(--faint);border-radius:8px;padding:12px">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:2px">PREDICTIONS ENTERED</div>
+          <div style="font-weight:700;font-size:22px" id="review-count">0</div>
+          <div style="font-size:11px;color:var(--muted)">out of 72 games</div>
+        </div>
+        <div style="background:var(--green-light);border-radius:8px;padding:12px">
+          <div style="font-size:11px;color:var(--green-text);margin-bottom:2px">ENTRY FEE</div>
+          <div style="font-weight:700;font-size:22px;color:var(--green-text)">£3</div>
+          <div style="font-size:11px;color:var(--green-text)">Pay to Laura Caples</div>
+        </div>
+      </div>
+      <div id="review-groups" style="margin-bottom:18px;font-size:12px;color:var(--muted)"></div>
+      <button class="btn btn-primary" id="submit-btn" onclick="submitEntry()" style="width:100%">
+        ✅ Submit my predictions
+      </button>
+      <div id="submit-error" style="margin-top:10px;font-size:13px;color:#dc2626;display:none"></div>
+    </div>
+  </div>
+
+  <!-- ── SUCCESS ── -->
+  <div class="screen" id="screen-success">
+    <div id="success-screen">
+      <div class="big-tick">🎉</div>
+      <h2>You're in!</h2>
+      <p id="success-msg">Your predictions have been submitted. Good luck! Remember to pay your £3 entry fee to Laura Caples before Thursday 11th June.</p>
+      <a href="index.html" style="display:inline-block;margin-top:10px;padding:10px 24px;background:var(--green);color:white;border-radius:8px;text-decoration:none;font-weight:600">View the league table →</a>
+    </div>
+  </div>
+
+  <div id="footer-spacer"></div>
+</div><!-- /content -->
+
+<!-- Footer nav -->
+<div id="footer-nav">
+  <button class="btn" id="back-btn" onclick="goBack()" style="display:none">← Back</button>
+  <div style="flex:1"></div>
+  <div id="step-label" style="font-size:13px;color:var(--muted)">Step 1 of 3</div>
+  <div style="flex:1;text-align:right">
+    <button class="btn btn-primary" id="next-btn" onclick="goNext()">Next →</button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────────
+// Worker URL is read from localStorage (set by the admin app) or hardcoded below.
+// If you want to hardcode it, replace '' with your Worker URL.
+const WORKER_URL = localStorage.getItem('wc_worker_url') || '';
+
+// ── FIXTURES ────────────────────────────────────────────────
+const FIXTURES = [
+  {id:1,g:"A",date:"11 Jun",time:"8pm",home:"Mexico",away:"South Africa"},
+  {id:2,g:"A",date:"12 Jun",time:"3am",home:"South Korea",away:"Czech Republic"},
+  {id:3,g:"B",date:"12 Jun",time:"8pm",home:"Canada",away:"Bosnia & Herz."},
+  {id:4,g:"D",date:"13 Jun",time:"2am",home:"USA",away:"Paraguay"},
+  {id:5,g:"B",date:"13 Jun",time:"8pm",home:"Qatar",away:"Switzerland"},
+  {id:6,g:"C",date:"13 Jun",time:"11pm",home:"Brazil",away:"Morocco"},
+  {id:7,g:"C",date:"14 Jun",time:"2am",home:"Haiti",away:"Scotland"},
+  {id:8,g:"D",date:"14 Jun",time:"5am",home:"Australia",away:"Turkey"},
+  {id:9,g:"E",date:"14 Jun",time:"6pm",home:"Germany",away:"Curacao"},
+  {id:10,g:"F",date:"14 Jun",time:"9pm",home:"Netherlands",away:"Japan"},
+  {id:11,g:"E",date:"15 Jun",time:"12am",home:"Ivory Coast",away:"Ecuador"},
+  {id:12,g:"F",date:"15 Jun",time:"3am",home:"Sweden",away:"Tunisia"},
+  {id:13,g:"H",date:"15 Jun",time:"5pm",home:"Spain",away:"Cape Verde"},
+  {id:14,g:"G",date:"15 Jun",time:"8pm",home:"Belgium",away:"Egypt"},
+  {id:15,g:"H",date:"15 Jun",time:"11pm",home:"Saudi Arabia",away:"Uruguay"},
+  {id:16,g:"G",date:"16 Jun",time:"2am",home:"Iran",away:"New Zealand"},
+  {id:17,g:"I",date:"16 Jun",time:"8pm",home:"France",away:"Senegal"},
+  {id:18,g:"I",date:"16 Jun",time:"11pm",home:"Iraq",away:"Norway"},
+  {id:19,g:"J",date:"17 Jun",time:"2am",home:"Argentina",away:"Algeria"},
+  {id:20,g:"J",date:"17 Jun",time:"5am",home:"Austria",away:"Jordan"},
+  {id:21,g:"K",date:"17 Jun",time:"6pm",home:"Portugal",away:"DR Congo"},
+  {id:22,g:"L",date:"17 Jun",time:"9pm",home:"England",away:"Croatia"},
+  {id:23,g:"L",date:"18 Jun",time:"12am",home:"Ghana",away:"Panama"},
+  {id:24,g:"K",date:"18 Jun",time:"3am",home:"Uzbekistan",away:"Colombia"},
+  {id:25,g:"A",date:"18 Jun",time:"5pm",home:"Czech Republic",away:"South Africa"},
+  {id:26,g:"B",date:"18 Jun",time:"8pm",home:"Switzerland",away:"Bosnia & Herz."},
+  {id:27,g:"B",date:"18 Jun",time:"11pm",home:"Canada",away:"Qatar"},
+  {id:28,g:"A",date:"19 Jun",time:"2am",home:"Mexico",away:"South Korea"},
+  {id:29,g:"D",date:"19 Jun",time:"8pm",home:"USA",away:"Australia"},
+  {id:30,g:"C",date:"19 Jun",time:"11pm",home:"Scotland",away:"Morocco"},
+  {id:31,g:"C",date:"20 Jun",time:"1:30am",home:"Brazil",away:"Haiti"},
+  {id:32,g:"D",date:"20 Jun",time:"4am",home:"Turkey",away:"Paraguay"},
+  {id:33,g:"A",date:"20 Jun",time:"6pm",home:"Netherlands",away:"Sweden"},
+  {id:34,g:"E",date:"20 Jun",time:"9pm",home:"Germany",away:"Ivory Coast"},
+  {id:35,g:"E",date:"21 Jun",time:"1am",home:"Ecuador",away:"Curacao"},
+  {id:36,g:"F",date:"21 Jun",time:"5am",home:"Tunisia",away:"Japan"},
+  {id:37,g:"H",date:"21 Jun",time:"5pm",home:"Spain",away:"Saudi Arabia"},
+  {id:38,g:"G",date:"21 Jun",time:"8pm",home:"Belgium",away:"Iran"},
+  {id:39,g:"H",date:"21 Jun",time:"11pm",home:"Uruguay",away:"Cape Verde"},
+  {id:40,g:"G",date:"22 Jun",time:"2am",home:"New Zealand",away:"Egypt"},
+  {id:41,g:"J",date:"22 Jun",time:"6pm",home:"Argentina",away:"Austria"},
+  {id:42,g:"I",date:"22 Jun",time:"10pm",home:"France",away:"Iraq"},
+  {id:43,g:"I",date:"23 Jun",time:"1am",home:"Norway",away:"Senegal"},
+  {id:44,g:"J",date:"23 Jun",time:"4am",home:"Jordan",away:"Algeria"},
+  {id:45,g:"K",date:"23 Jun",time:"6pm",home:"Portugal",away:"Uzbekistan"},
+  {id:46,g:"L",date:"23 Jun",time:"9pm",home:"England",away:"Ghana"},
+  {id:47,g:"L",date:"24 Jun",time:"12am",home:"Panama",away:"Croatia"},
+  {id:48,g:"K",date:"24 Jun",time:"3am",home:"Colombia",away:"DR Congo"},
+  {id:49,g:"B",date:"24 Jun",time:"8pm",home:"Switzerland",away:"Canada"},
+  {id:50,g:"B",date:"24 Jun",time:"8pm",home:"Bosnia & Herz.",away:"Qatar"},
+  {id:51,g:"C",date:"24 Jun",time:"11pm",home:"Morocco",away:"Haiti"},
+  {id:52,g:"C",date:"24 Jun",time:"11pm",home:"Scotland",away:"Brazil"},
+  {id:53,g:"A",date:"25 Jun",time:"2am",home:"South Africa",away:"South Korea"},
+  {id:54,g:"A",date:"25 Jun",time:"2am",home:"Czech Republic",away:"Mexico"},
+  {id:55,g:"E",date:"25 Jun",time:"9pm",home:"Curacao",away:"Ivory Coast"},
+  {id:56,g:"E",date:"25 Jun",time:"9pm",home:"Ecuador",away:"Germany"},
+  {id:57,g:"F",date:"26 Jun",time:"12am",home:"Tunisia",away:"Netherlands"},
+  {id:58,g:"F",date:"26 Jun",time:"12am",home:"Japan",away:"Sweden"},
+  {id:59,g:"D",date:"26 Jun",time:"3am",home:"Turkey",away:"USA"},
+  {id:60,g:"D",date:"26 Jun",time:"3am",home:"Paraguay",away:"Australia"},
+  {id:61,g:"I",date:"26 Jun",time:"8pm",home:"Norway",away:"France"},
+  {id:62,g:"I",date:"26 Jun",time:"8pm",home:"Senegal",away:"Iraq"},
+  {id:63,g:"H",date:"27 Jun",time:"1am",home:"Cape Verde",away:"Saudi Arabia"},
+  {id:64,g:"H",date:"27 Jun",time:"1am",home:"Uruguay",away:"Spain"},
+  {id:65,g:"G",date:"27 Jun",time:"4am",home:"New Zealand",away:"Belgium"},
+  {id:66,g:"G",date:"27 Jun",time:"4am",home:"Egypt",away:"Iran"},
+  {id:67,g:"L",date:"27 Jun",time:"10pm",home:"Panama",away:"England"},
+  {id:68,g:"L",date:"27 Jun",time:"10pm",home:"Croatia",away:"Ghana"},
+  {id:69,g:"K",date:"28 Jun",time:"12:30am",home:"Colombia",away:"Portugal"},
+  {id:70,g:"K",date:"28 Jun",time:"12:30am",home:"DR Congo",away:"Uzbekistan"},
+  {id:71,g:"J",date:"28 Jun",time:"3am",home:"Algeria",away:"Austria"},
+  {id:72,g:"J",date:"28 Jun",time:"3am",home:"Jordan",away:"Argentina"},
+];
+
+const GROUPS = [...new Set(FIXTURES.map(f=>f.g))].sort();
+const FLAGS = {
+  "Mexico":"🇲🇽","South Africa":"🇿🇦","South Korea":"🇰🇷","Czech Republic":"🇨🇿",
+  "Canada":"🇨🇦","Bosnia & Herz.":"🇧🇦","USA":"🇺🇸","Paraguay":"🇵🇾",
+  "Qatar":"🇶🇦","Switzerland":"🇨🇭","Brazil":"🇧🇷","Morocco":"🇲🇦",
+  "Haiti":"🇭🇹","Scotland":"🏴󠁧󠁢󠁳󠁣󠁴󠁿","Australia":"🇦🇺","Turkey":"🇹🇷",
+  "Germany":"🇩🇪","Curacao":"🇨🇼","Netherlands":"🇳🇱","Japan":"🇯🇵",
+  "Ivory Coast":"🇨🇮","Ecuador":"🇪🇨","Sweden":"🇸🇪","Tunisia":"🇹🇳",
+  "Spain":"🇪🇸","Cape Verde":"🇨🇻","Belgium":"🇧🇪","Egypt":"🇪🇬",
+  "Saudi Arabia":"🇸🇦","Uruguay":"🇺🇾","Iran":"🇮🇷","New Zealand":"🇳🇿",
+  "France":"🇫🇷","Senegal":"🇸🇳","Iraq":"🇮🇶","Norway":"🇳🇴",
+  "Argentina":"🇦🇷","Algeria":"🇩🇿","Austria":"🇦🇹","Jordan":"🇯🇴",
+  "Portugal":"🇵🇹","DR Congo":"🇨🇩","England":"🏴󠁧󠁢󠁥󠁮󠁧󠁿","Croatia":"🇭🇷",
+  "Ghana":"🇬🇭","Panama":"🇵🇦","Uzbekistan":"🇺🇿","Colombia":"🇨🇴",
+};
+
+// ── STATE ───────────────────────────────────────────────────
+let currentStep = 1;
+let activeGroup = 'A';
+const predictions = {}; // {fid: {home, away}}
+
+// ── INIT ────────────────────────────────────────────────────
+if (!WORKER_URL) {
+  document.getElementById('config-banner').classList.add('show');
+}
+
+buildGroupTabs();
+renderGroup('A');
+
+// ── STEPS ───────────────────────────────────────────────────
+function goNext() {
+  if (currentStep === 1) {
+    const name = document.getElementById('p-name').value.trim();
+    const team = document.getElementById('p-team').value.trim();
+    if (!name) { toast('Please enter your name', 'error'); document.getElementById('p-name').focus(); return; }
+    if (!team) { toast('Please enter a team name', 'error'); document.getElementById('p-team').focus(); return; }
+    showStep(2);
+  } else if (currentStep === 2) {
+    collectCurrentGroup();
+    showStep(3);
+    buildReview();
+  }
+}
+
+function goBack() {
+  if (currentStep === 2) { collectCurrentGroup(); showStep(1); }
+  else if (currentStep === 3) showStep(2);
+}
+
+function showStep(n) {
+  currentStep = n;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + n).classList.add('active');
+  document.getElementById('back-btn').style.display = n > 1 ? '' : 'none';
+  document.getElementById('next-btn').style.display = n < 3 ? '' : 'none';
+  document.getElementById('footer-nav').style.display = n === 4 ? 'none' : '';
+  document.getElementById('step-label').textContent = n <= 3 ? `Step ${n} of 3` : '';
+  updateStepIndicators(n);
+  window.scrollTo(0, 0);
+}
+
+function updateStepIndicators(n) {
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById(`step${i}-indicator`);
+    const div = document.getElementById(`div${i}`);
+    if (i < n) {
+      el.className = 'step done';
+      el.innerHTML = `<span class="step-done-icon">✅</span><span>${el.querySelector('span:last-child')?.textContent || ''}</span>`;
+      if (div) div.className = 'step-divider done';
+    } else if (i === n) {
+      el.className = 'step active';
+    } else {
+      el.className = 'step';
+    }
+  }
+}
+
+// ── GROUP TABS ──────────────────────────────────────────────
+function buildGroupTabs() {
+  document.getElementById('group-tabs').innerHTML = GROUPS.map(g =>
+    `<div class="gtab ${g==='A'?'active':''}" id="gtab-${g}" onclick="switchGroup('${g}')">Group ${g}</div>`
+  ).join('');
+}
+
+function switchGroup(g) {
+  collectCurrentGroup();
+  activeGroup = g;
+  document.querySelectorAll('.gtab').forEach(t => t.classList.remove('active'));
+  const tab = document.getElementById('gtab-' + g);
+  if (tab) tab.classList.add('active');
+  renderGroup(g);
+}
+
+function renderGroup(g) {
+  const fixtures = FIXTURES.filter(f => f.g === g);
+  document.getElementById('fx-tbody').innerHTML = fixtures.map(f => {
+    const p = predictions[f.id];
+    return `<tr>
+      <td class="fx-meta">${f.date}<br>${f.time}</td>
+      <td class="fx-team">${FLAGS[f.home]||''} ${esc(f.home)} <span style="color:var(--muted);font-size:11px">vs</span> ${esc(f.away)} ${FLAGS[f.away]||''}</td>
+      <td>
+        <div class="score-wrap">
+          <input class="score-box" type="number" min="0" max="20" id="fh-${f.id}" placeholder="H" value="${p?.home??''}" oninput="onScoreInput(${f.id})">
+          <span class="score-sep">–</span>
+          <input class="score-box" type="number" min="0" max="20" id="fa-${f.id}" placeholder="A" value="${p?.away??''}" oninput="onScoreInput(${f.id})">
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function onScoreInput(fid) {
+  const h = document.getElementById('fh-'+fid)?.value;
+  const a = document.getElementById('fa-'+fid)?.value;
+  if (h !== '' && a !== '') {
+    predictions[fid] = { home: h, away: a };
+  } else {
+    delete predictions[fid];
+  }
+  updateProgress();
+  updateGroupTabState();
+}
+
+function collectCurrentGroup() {
+  FIXTURES.filter(f => f.g === activeGroup).forEach(f => {
+    const h = document.getElementById('fh-'+f.id)?.value;
+    const a = document.getElementById('fa-'+f.id)?.value;
+    if (h !== undefined && a !== undefined) {
+      if (h !== '' && a !== '') predictions[f.id] = { home: h, away: a };
+      else delete predictions[f.id];
+    }
+  });
+  updateProgress();
+  updateGroupTabState();
+}
+
+function updateProgress() {
+  const count = Object.keys(predictions).length;
+  const pct = Math.round(count / FIXTURES.length * 100);
+  document.getElementById('progress-text').textContent = `${count} / ${FIXTURES.length}`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+}
+
+function updateGroupTabState() {
+  GROUPS.forEach(g => {
+    const groupFids = FIXTURES.filter(f => f.g === g).map(f => f.id);
+    const hasPreds = groupFids.some(id => predictions[id]);
+    const tab = document.getElementById('gtab-' + g);
+    if (tab) {
+      tab.classList.toggle('has-preds', hasPreds);
+    }
+  });
+}
+
+// ── REVIEW ──────────────────────────────────────────────────
+function buildReview() {
+  const name = document.getElementById('p-name').value.trim();
+  const team = document.getElementById('p-team').value.trim();
+  const count = Object.keys(predictions).length;
+  document.getElementById('review-name').textContent = name;
+  document.getElementById('review-team').textContent = team;
+  document.getElementById('review-count').textContent = count;
+
+  // Group breakdown
+  const breakdown = GROUPS.map(g => {
+    const total = FIXTURES.filter(f => f.g === g).length;
+    const done = FIXTURES.filter(f => f.g === g && predictions[f.id]).length;
+    const col = done === total ? '#15803d' : done > 0 ? '#b45309' : '#94a3b8';
+    return `<span style="margin-right:8px;color:${col}">Grp ${g}: ${done}/${total}</span>`;
+  }).join('');
+  document.getElementById('review-groups').innerHTML = breakdown;
+}
+
+// ── SUBMIT ──────────────────────────────────────────────────
+async function submitEntry() {
+  const name = document.getElementById('p-name').value.trim();
+  const team = document.getElementById('p-team').value.trim();
+  const btn = document.getElementById('submit-btn');
+  const errEl = document.getElementById('submit-error');
+
+  if (!WORKER_URL) {
+    errEl.textContent = 'Cannot submit — the organiser has not configured the Worker URL yet. Contact them directly.';
+    errEl.style.display = '';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+  errEl.style.display = 'none';
+
+  try {
+    const res = await fetch(WORKER_URL + '/api/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, team, predictions }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Server error');
+
+    const isUpdate = data.updated;
+    document.getElementById('success-msg').textContent = isUpdate
+      ? `Your predictions have been updated, ${name}! Good luck. Remember to pay your £3 entry fee to Laura Caples before Thursday 11th June.`
+      : `You're entered, ${name}! Good luck. Remember to pay your £3 entry fee to Laura Caples before Thursday 11th June.`;
+
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-success').classList.add('active');
+    document.getElementById('footer-nav').style.display = 'none';
+    updateStepIndicators(4);
+
+  } catch(e) {
+    btn.disabled = false;
+    btn.textContent = '✅ Submit my predictions';
+    errEl.textContent = 'Submission failed: ' + e.message + '. Try again or contact the organiser.';
+    errEl.style.display = '';
+  }
+}
+
+// ── UTILS ───────────────────────────────────────────────────
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+let toastTimer;
+function toast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show' + (type ? ' '+type : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
