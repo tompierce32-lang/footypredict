@@ -105,11 +105,38 @@
   @media (max-width: 480px) {
     .fx-table thead th:first-child, .fx-table td:first-child { display: none; }
   }
+  /* ── Access gate ── */
+  #access-gate { position: fixed; inset: 0; background: #064e3b; z-index: 999; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  #access-gate.hidden { display: none; }
+  .gate-box { background: white; border-radius: 16px; padding: 36px 28px; max-width: 360px; width: 100%; text-align: center; }
+  .gate-box h2 { font-size: 20px; font-weight: 700; margin-bottom: 4px; }
+  .gate-box p { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+  .gate-box input { width: 100%; padding: 12px; font-size: 20px; font-weight: 700; text-align: center; letter-spacing: 4px; text-transform: uppercase; border: 2px solid var(--border); border-radius: 10px; color: #0f172a; background: #ffffff; margin-bottom: 12px; }
+  .gate-box input:focus { outline: none; border-color: #064e3b; }
+  .gate-box input.shake { animation: shake .3s; border-color: #dc2626; }
+  .gate-btn { width: 100%; padding: 12px; background: #064e3b; color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .gate-btn:hover { background: #065f46; }
+  .gate-error { color: #dc2626; font-size: 13px; margin-top: 8px; min-height: 20px; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-6px)} 75%{transform:translateX(6px)} }
 </style>
 </head>
 <body>
 
 <div id="config-banner">⚠️ Worker URL not configured — predictions cannot be submitted. Contact the organiser.</div>
+
+<!-- ── ACCESS GATE ── -->
+<div id="access-gate">
+  <div class="gate-box">
+    <div style="font-size:48px;margin-bottom:12px">⚽</div>
+    <h2>Staff World Cup 2026</h2>
+    <p>Enter your access code to continue</p>
+    <input type="text" id="access-input" placeholder="ACCESS CODE" maxlength="20"
+      autocomplete="off" autocorrect="off" spellcheck="false"
+      onkeydown="if(event.key==='Enter') checkCode()">
+    <button class="gate-btn" onclick="checkCode()">Enter →</button>
+    <div class="gate-error" id="gate-error"></div>
+  </div>
+</div>
 
 <div id="header">
   <div style="font-size:32px;margin-bottom:6px">⚽</div>
@@ -117,7 +144,7 @@
   <p>Prediction League · Entry £3 · Deadline: Thursday 11th June 2026, 8pm</p>
 </div>
 
-<div id="steps">
+<div id="steps" style="display:none">
   <div class="step active" id="step1-indicator">
     <div class="step-num">1</div>
     <span>Your details</span>
@@ -134,7 +161,7 @@
   </div>
 </div>
 
-<div id="content">
+<div id="content" style="display:none">
 
   <!-- ── STEP 1: Details ── -->
   <div class="screen active" id="screen-1">
@@ -237,7 +264,7 @@
 </div><!-- /content -->
 
 <!-- Footer nav -->
-<div id="footer-nav">
+<div id="footer-nav" style="display:none">
   <button class="btn" id="back-btn" onclick="goBack()" style="display:none">← Back</button>
   <div style="flex:1"></div>
   <div id="step-label" style="font-size:13px;color:var(--muted)">Step 1 of 3</div>
@@ -249,6 +276,27 @@
 <div id="toast"></div>
 
 <script>
+// ── ACCESS CODE ─────────────────────────────────────────────
+const ACCESS_CODE = 'BVS2026';
+
+function checkCode() {
+  const input = document.getElementById('access-input');
+  const val = input.value.trim().toUpperCase();
+  const errEl = document.getElementById('gate-error');
+  if (val === ACCESS_CODE.toUpperCase()) {
+    document.getElementById('access-gate').classList.add('hidden');
+    document.getElementById('steps').style.display = '';
+    document.getElementById('content').style.display = '';
+    document.getElementById('footer-nav').style.display = '';
+    errEl.textContent = '';
+  } else {
+    input.classList.add('shake');
+    errEl.textContent = 'Incorrect code — please try again';
+    input.value = '';
+    setTimeout(() => { input.classList.remove('shake'); input.focus(); }, 400);
+  }
+}
+
 // ── CONFIG ──────────────────────────────────────────────────
 // Worker URL is read from localStorage (set by the admin app) or hardcoded below.
 // If you want to hardcode it, replace '' with your Worker URL.
