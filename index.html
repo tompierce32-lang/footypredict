@@ -76,7 +76,7 @@
   .result-badge { background: var(--green-bg); color: var(--green-text); font-weight: 700; font-size: 13px; padding: 3px 10px; border-radius: 6px; }
   .tbp { font-size: 11px; color: var(--muted); }
   .fx-inputs { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
-  .score-input { width: 44px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; text-align: center; }
+  .score-input { width: 58px; padding: 5px 4px; border: 1px solid var(--border); border-radius: 6px; font-size: 15px; font-weight: 600; text-align: center; color: #0f172a; background: #ffffff; }
   .save-btn { padding: 4px 12px; background: #064e3b; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 12px; }
   .save-btn:hover { background: #065f46; }
   .clear-btn { padding: 4px 10px; background: none; border: 1px solid var(--border); border-radius: 6px; cursor: pointer; font-size: 12px; color: var(--muted); }
@@ -92,7 +92,7 @@
   .form-group { display: flex; flex-direction: column; gap: 4px; }
   .form-group label { font-size: 11px; color: var(--muted); font-weight: 600; }
   input[type=text], input[type=password], input[type=number], textarea, select {
-    padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; background: white; color: var(--text);
+    padding: 7px 10px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; background: #ffffff; color: #0f172a;
   }
   input[type=text]:focus, input[type=password]:focus, input[type=number]:focus, textarea:focus { outline: 2px solid #064e3b; border-color: transparent; }
   .btn { padding: 7px 16px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; border: 1px solid var(--border); background: white; color: var(--text); }
@@ -148,17 +148,27 @@
     .pts-badge { font-size: 16px; padding: 3px 10px; }
   }
 
+  /* ── Player cards ── */
+  .player-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; margin-bottom: 10px; overflow: hidden; }
+  .player-card-header { display: flex; align-items: center; gap: 10px; padding: 12px 16px; cursor: pointer; }
+  .player-card-header:hover { background: var(--faint); }
+  .player-card-avatar { width: 36px; height: 36px; border-radius: 50%; background: #064e3b; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 14px; flex-shrink: 0; }
+  .player-card-info { flex: 1; }
+  .player-card-name { font-weight: 600; font-size: 14px; }
+  .player-card-sub { font-size: 12px; color: var(--muted); }
+  .player-card-body { border-top: 1px solid var(--border); padding: 16px; display: none; }
+  .player-card-body.open { display: block; }
+  .player-card-edit-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; margin-bottom: 14px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
   /* ── Prediction entry grid ── */
   .pred-entry-grid { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .pred-entry-grid th { background: var(--faint); padding: 6px 10px; text-align: left; font-weight: 600; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1; }
-  .pred-entry-grid td { padding: 5px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .pred-entry-grid th { background: var(--faint); padding: 6px 8px; text-align: left; font-weight: 600; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1; }
+  .pred-entry-grid td { padding: 4px 6px; border-bottom: 1px solid var(--border); vertical-align: middle; }
   .pred-entry-grid tr:hover td { background: var(--faint); }
-  .pred-score-input { width: 38px; padding: 3px 4px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; text-align: center; }
-  .pred-save-btn { padding: 2px 8px; background: #064e3b; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
+  .pred-score-input { width: 52px; padding: 4px 2px; border: 1px solid var(--border); border-radius: 4px; font-size: 14px; font-weight: 600; text-align: center; color: #0f172a; background: #ffffff; }
+  .pred-save-btn { padding: 2px 8px; background: #064e3b; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; white-space: nowrap; }
   .pred-save-btn:hover { background: #065f46; }
-  .pred-saved { font-size: 11px; color: var(--muted); }
-  .pred-pts-cell { font-size: 12px; font-weight: 700; min-width: 32px; }
-  .pred-group-header td { background: #064e3b; color: white; font-weight: 700; font-size: 11px; padding: 4px 10px; }
+  .pred-pts-cell { font-size: 12px; font-weight: 700; min-width: 28px; text-align: center; }
+  .pred-group-header td { background: #064e3b; color: white; font-weight: 700; font-size: 11px; padding: 3px 8px; }
   .pred-player-btn { padding: 5px 14px; border: 1px solid var(--border); border-radius: 20px; cursor: pointer; font-size: 12px; background: white; margin: 0 4px 6px 0; }
   .pred-player-btn.active { background: #064e3b; color: white; border-color: #064e3b; font-weight: 600; }
   .hidden { display: none !important; }
@@ -285,75 +295,43 @@
     <!-- Stats -->
     <div class="stat-grid" id="admin-stats-grid"></div>
 
-    <!-- Add player -->
-    <details class="card" style="margin-bottom:12px">
-      <summary>➕ Add new entrant</summary>
-      <div style="margin-top:14px">
-        <div class="form-row">
-          <div class="form-group">
-            <label>Full name</label>
-            <input type="text" id="new-name" placeholder="e.g. John Smith" style="width:180px">
-          </div>
-          <div class="form-group">
-            <label>Team name</label>
-            <input type="text" id="new-team" placeholder="e.g. The Eagles" style="width:180px">
-          </div>
-          <div class="form-group" style="justify-content:flex-end">
-            <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-              <input type="checkbox" id="new-paid"> Paid £3
-            </label>
-          </div>
-          <button class="btn btn-primary" onclick="addPlayer()">Add player</button>
+    <!-- Add new entrant form -->
+    <div class="card" style="margin-bottom:14px">
+      <div style="font-weight:600;font-size:14px;margin-bottom:12px">➕ Add new entrant</div>
+      <div class="player-card-edit-row" style="border-bottom:none;margin-bottom:0;padding-bottom:0">
+        <div class="form-group">
+          <label>Full name</label>
+          <input type="text" id="new-name" placeholder="e.g. John Smith" style="width:170px">
         </div>
+        <div class="form-group">
+          <label>Team name</label>
+          <input type="text" id="new-team" placeholder="e.g. The Eagles" style="width:170px">
+        </div>
+        <div class="form-group" style="justify-content:flex-end">
+          <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin-top:18px">
+            <input type="checkbox" id="new-paid"> Paid £3
+          </label>
+        </div>
+        <button class="btn btn-primary" onclick="addPlayer()" style="margin-top:18px">Add &amp; enter predictions →</button>
       </div>
-    </details>
+    </div>
 
     <!-- Import from Forms -->
-    <details class="card" style="margin-bottom:12px">
+    <details class="card" style="margin-bottom:14px">
       <summary>📋 Import from Microsoft Forms CSV</summary>
       <div style="margin-top:14px">
-        <div class="info-box">Paste rows in format: <strong>Name, Team Name</strong> (one per line). Export your Forms responses to Excel, then copy the two columns here.</div>
-        <textarea id="import-csv" rows="5" style="width:100%;margin-bottom:8px;resize:vertical" placeholder="Sarah Johnson, The Predictors&#10;Mike Davies, Lucky Dips&#10;Laura Caples, The Gaffer"></textarea>
+        <div class="info-box">Paste rows as <strong>Name, Team Name</strong> (one per line). Export Forms responses to Excel, copy those two columns here.</div>
+        <textarea id="import-csv" rows="4" style="width:100%;margin-bottom:8px;resize:vertical" placeholder="Sarah Johnson, The Predictors&#10;Mike Davies, Lucky Dips"></textarea>
         <button class="btn btn-primary" onclick="importCSV()">Import players</button>
       </div>
     </details>
 
-    <!-- Player list -->
-    <details class="card" style="margin-bottom:12px" open>
-      <summary>👥 All entrants</summary>
-      <div style="margin-top:10px" id="admin-player-list"></div>
-    </details>
-
-    <!-- Enter Predictions (admin) -->
-    <details class="card" style="margin-bottom:12px" id="pred-entry-section">
-      <summary>🎯 Enter player predictions</summary>
-      <div style="margin-top:14px">
-        <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Select a player then enter their predicted scores from their paper sheet. Each row auto-saves when you click Save.</p>
-        <div id="pred-entry-player-tabs" style="margin-bottom:12px;display:flex;flex-wrap:wrap;gap:0"></div>
-        <div id="pred-entry-table-wrap" style="overflow-x:auto;max-height:520px;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
-          <table class="pred-entry-grid" id="pred-entry-table">
-            <thead>
-              <tr>
-                <th style="min-width:60px">Date</th>
-                <th style="min-width:180px">Fixture</th>
-                <th style="min-width:80px">Prediction</th>
-                <th style="min-width:70px">Result</th>
-                <th style="min-width:36px">Pts</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="pred-entry-tbody"></tbody>
-          </table>
-        </div>
-        <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
-          <button class="btn btn-primary" onclick="saveAllPreds()" id="save-all-btn" style="display:none">💾 Save all unsaved</button>
-          <span id="pred-entry-status" style="font-size:12px;color:var(--muted)"></span>
-        </div>
-      </div>
-    </details>
+    <!-- Player cards list -->
+    <div style="font-weight:600;font-size:15px;margin-bottom:10px">👥 All entrants <span id="entrant-count" style="font-size:12px;color:var(--muted);font-weight:400"></span></div>
+    <div id="admin-player-list"></div>
 
     <!-- Bulk mark paid -->
-    <details class="card" style="margin-bottom:12px">
+    <details class="card" style="margin-bottom:12px;margin-top:14px">
       <summary>💷 Payment management</summary>
       <div style="margin-top:12px">
         <div id="payment-list"></div>
@@ -589,7 +567,6 @@ let activeTab = 'standings';
 let activeFxGroup = 'A';
 let activePredGroup = 'A';
 let activePredPlayer = null;
-let activePredEntryPlayer = null;
 
 // ════════════════════════════════════════════════════════════
 // CLOUDFLARE SYNC
@@ -782,7 +759,6 @@ function setAdmin(v) {
   badge.className = v ? 'admin' : 'public';
   const footer = document.getElementById('public-footer');
   if (footer) footer.style.display = v ? 'none' : '';
-  if (v) renderPredEntry();
 }
 
 // ════════════════════════════════════════════════════════════
@@ -800,7 +776,7 @@ function renderTab(tab) {
   if (tab === 'standings') renderStandings();
   if (tab === 'fixtures') renderFixtures();
   if (tab === 'predictions') renderPredictions();
-  if (tab === 'admin') { renderAdmin(); renderPredEntry(); }
+  if (tab === 'admin') renderAdmin();
 }
 function render() {
   renderTab(activeTab);
@@ -990,33 +966,89 @@ function savePred(pid, fid) {
 function renderAdmin() {
   const paid = state.players.filter(p=>p.paid).length;
   const unpaid = state.players.length - paid;
+  const pot = paid * 3;
   document.getElementById('admin-stats-grid').innerHTML = [
     { label: 'Total entrants', val: state.players.length },
     { label: 'Paid', val: paid },
     { label: 'Unpaid', val: unpaid },
-    { label: 'Entry pot', val: `£${paid * 3}` },
-    { label: '1st prize', val: `£${Math.round(paid*3*0.5)}` },
-    { label: '2nd prize', val: `£${Math.round(paid*3*0.3)}` },
-    { label: '3rd prize', val: `£${Math.round(paid*3*0.2)}` },
+    { label: 'Entry pot', val: `£${pot}` },
+    { label: '1st prize', val: `£${pot - Math.floor(pot*0.3) - Math.floor(pot*0.2)}` },
+    { label: '2nd prize', val: `£${Math.floor(pot*0.3)}` },
+    { label: '3rd prize', val: `£${Math.floor(pot*0.2)}` },
   ].map(s => `<div class="stat"><div class="stat-label">${s.label}</div><div class="stat-val">${s.val}</div></div>`).join('');
 
-  // Player list
-  document.getElementById('admin-player-list').innerHTML = state.players.length === 0
-    ? '<p style="color:var(--muted);font-size:13px">No entrants yet.</p>'
-    : state.players.map(p => `
-      <div class="player-row">
-        <div style="flex:1">
-          <span style="font-weight:600">${esc(p.name)}</span>
-          <span style="color:var(--muted);margin-left:8px;font-size:12px">${esc(p.team)}</span>
+  // Entrant count badge
+  const countEl = document.getElementById('entrant-count');
+  if (countEl) countEl.textContent = state.players.length ? `(${state.players.length})` : '';
+
+  // Player cards
+  const listEl = document.getElementById('admin-player-list');
+  if (state.players.length === 0) {
+    listEl.innerHTML = '<p style="color:var(--muted);font-size:13px;padding:8px 0">No entrants yet. Add one above.</p>';
+  } else {
+    listEl.innerHTML = state.players.map(p => {
+      const initials = p.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+      const predCount = Object.keys(p.predictions||{}).length;
+      const predPct = Math.round(predCount / FIXTURES.length * 100);
+      const score = playerScore(p);
+      return `
+      <div class="player-card" id="card-${p.id}">
+        <div class="player-card-header" onclick="toggleCard('${p.id}')">
+          <div class="player-card-avatar">${initials}</div>
+          <div class="player-card-info">
+            <div class="player-card-name">${esc(p.name)}</div>
+            <div class="player-card-sub">${esc(p.team)} · ${predCount}/${FIXTURES.length} predictions · ${score.total} pts</div>
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;flex-shrink:0">
+            <span style="padding:3px 10px;font-size:11px;border-radius:20px;border:1px solid;font-weight:600;background:${p.paid?'var(--green-bg)':'var(--red-bg)'};color:${p.paid?'var(--green-text)':'var(--red-text)'};border-color:${p.paid?'#86efac':'#fca5a5'}">${p.paid?'✓ Paid':'Unpaid'}</span>
+            <span style="font-size:18px;color:var(--muted);line-height:1" id="card-chevron-${p.id}">›</span>
+          </div>
         </div>
-        <button onclick="togglePaid('${p.id}')" style="padding:3px 10px;font-size:11px;border-radius:20px;border:1px solid;cursor:pointer;font-weight:600;background:${p.paid?'var(--green-bg)':'var(--red-bg)'};color:${p.paid?'var(--green-text)':'var(--red-text)'};border-color:${p.paid?'#86efac':'#fca5a5'}">
-          ${p.paid ? '✓ Paid' : 'Unpaid'}
-        </button>
-        <button onclick="removePlayer('${p.id}')" class="btn btn-danger" style="padding:3px 8px;font-size:12px">✕</button>
-      </div>`).join('');
+        <div class="player-card-body" id="card-body-${p.id}">
+          <!-- Edit details -->
+          <div class="player-card-edit-row">
+            <div class="form-group">
+              <label>Full name</label>
+              <input type="text" id="edit-name-${p.id}" value="${esc(p.name)}" style="width:160px">
+            </div>
+            <div class="form-group">
+              <label>Team name</label>
+              <input type="text" id="edit-team-${p.id}" value="${esc(p.team)}" style="width:160px">
+            </div>
+            <div class="form-group" style="justify-content:flex-end">
+              <label style="display:flex;align-items:center;gap:6px;cursor:pointer;margin-top:18px">
+                <input type="checkbox" id="edit-paid-${p.id}" ${p.paid?'checked':''}> Paid £3
+              </label>
+            </div>
+            <button class="btn btn-primary" onclick="savePlayerEdit('${p.id}')" style="margin-top:18px">Save details</button>
+            <button class="btn btn-danger" onclick="removePlayer('${p.id}')" style="margin-top:18px">🗑 Delete</button>
+          </div>
+          <!-- Prediction entry -->
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+            <div style="font-weight:600;font-size:13px">Score predictions <span style="font-weight:400;color:var(--muted);font-size:12px">${predCount}/${FIXTURES.length} entered${predPct>0?' · '+predPct+'% complete':''}</span></div>
+            <button class="btn btn-primary" onclick="saveAllPredsFor('${p.id}')" style="font-size:12px;padding:4px 12px">💾 Save all</button>
+          </div>
+          <div style="overflow-x:auto;max-height:460px;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
+            <table class="pred-entry-grid">
+              <thead><tr>
+                <th style="min-width:55px">Date</th>
+                <th>Fixture</th>
+                <th style="min-width:90px">Prediction</th>
+                <th style="min-width:60px">Result</th>
+                <th style="min-width:28px">Pts</th>
+              </tr></thead>
+              <tbody>${buildPredRows(p)}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
 
   // Payment list
-  document.getElementById('payment-list').innerHTML = state.players.map(p => `
+  document.getElementById('payment-list').innerHTML = state.players.length === 0
+    ? '<p style="color:var(--muted);font-size:13px">No entrants yet.</p>'
+    : state.players.map(p => `
     <div class="player-row">
       <div style="flex:1">${esc(p.name)} <span style="color:var(--muted);font-size:12px">${esc(p.team)}</span></div>
       <button onclick="togglePaid('${p.id}')" style="padding:4px 14px;font-size:12px;border-radius:6px;border:1px solid;cursor:pointer;font-weight:500;background:${p.paid?'var(--green-bg)':'white'};color:${p.paid?'var(--green-text)':'var(--muted)'};border-color:var(--border)">
@@ -1025,26 +1057,143 @@ function renderAdmin() {
     </div>`).join('');
 }
 
+function buildPredRows(p) {
+  let html = '';
+  let lastGroup = null;
+  FIXTURES.forEach(f => {
+    if (f.g !== lastGroup) {
+      html += `<tr class="pred-group-header"><td colspan="5">Group ${f.g}</td></tr>`;
+      lastGroup = f.g;
+    }
+    const pred = p.predictions && p.predictions[f.id];
+    const r = state.results[f.id];
+    const pts = calcPts(pred, r);
+    const ptsHtml = pts !== null
+      ? `<span style="color:${pts===5?'#15803d':pts>0?'#1d4ed8':'#94a3b8'};font-weight:700">${pts}</span>`
+      : '';
+    const resultHtml = r
+      ? `<span style="background:var(--green-bg);color:var(--green-text);padding:1px 5px;border-radius:4px;font-weight:700;font-size:11px">${r.home}–${r.away}</span>`
+      : '<span style="color:var(--muted);font-size:10px">TBP</span>';
+    html += `<tr>
+      <td style="font-size:10px;color:var(--muted);white-space:nowrap;line-height:1.3">${f.date}<br>${f.time}</td>
+      <td style="font-size:12px">${FLAGS[f.home]||''} ${esc(f.home)} <span style="color:var(--muted)">v</span> ${esc(f.away)} ${FLAGS[f.away]||''}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:2px">
+          <input class="pred-score-input" type="number" min="0" max="20" id="pe-${p.id}-h-${f.id}" value="${pred?.home??''}" placeholder="H">
+          <span style="font-size:10px;color:var(--muted)">–</span>
+          <input class="pred-score-input" type="number" min="0" max="20" id="pe-${p.id}-a-${f.id}" value="${pred?.away??''}" placeholder="A">
+          <button class="pred-save-btn" onclick="savePredInline('${p.id}',${f.id})">✓</button>
+        </div>
+      </td>
+      <td>${resultHtml}</td>
+      <td class="pred-pts-cell">${ptsHtml}</td>
+    </tr>`;
+  });
+  return html;
+}
+
+function toggleCard(pid) {
+  const body = document.getElementById('card-body-' + pid);
+  const chevron = document.getElementById('card-chevron-' + pid);
+  if (!body) return;
+  const isOpen = body.classList.contains('open');
+  body.classList.toggle('open', !isOpen);
+  if (chevron) chevron.style.transform = isOpen ? '' : 'rotate(90deg)';
+}
+
+function savePlayerEdit(pid) {
+  const p = state.players.find(pl => pl.id === pid);
+  if (!p) return;
+  const name = document.getElementById('edit-name-' + pid)?.value.trim();
+  const team = document.getElementById('edit-team-' + pid)?.value.trim();
+  const paid = document.getElementById('edit-paid-' + pid)?.checked;
+  if (!name || !team) { toast('Name and team required', 'error'); return; }
+  p.name = name; p.team = team; p.paid = paid;
+  saveLocal(); pushData();
+  renderAdmin(); renderStandings(); updateTopbar();
+  toast('Player updated ✓');
+  // Re-open the card after re-render
+  setTimeout(() => { toggleCard(pid); }, 50);
+}
+
+function savePredInline(pid, fid) {
+  const h = document.getElementById(`pe-${pid}-h-${fid}`)?.value;
+  const a = document.getElementById(`pe-${pid}-a-${fid}`)?.value;
+  if (h===undefined||a===undefined||h===''||a==='') { toast('Enter both scores', 'error'); return; }
+  const p = state.players.find(pl => pl.id === pid);
+  if (!p) return;
+  if (!p.predictions) p.predictions = {};
+  p.predictions[fid] = { home: h, away: a };
+  saveLocal(); pushData();
+  // Update pts cell inline without full re-render
+  const r = state.results[fid];
+  const pts = calcPts({home:h,away:a}, r);
+  const row = document.getElementById(`pe-${pid}-h-${fid}`)?.closest('tr');
+  if (row && pts !== null) {
+    const ptsCell = row.querySelector('.pred-pts-cell');
+    if (ptsCell) ptsCell.innerHTML = `<span style="color:${pts===5?'#15803d':pts>0?'#1d4ed8':'#94a3b8'};font-weight:700">${pts}</span>`;
+  }
+  // Flash the save button green
+  const btn = document.getElementById(`pe-${pid}-h-${fid}`)?.closest('tr').querySelector('.pred-save-btn');
+  if (btn) { btn.textContent='✓'; btn.style.background='#15803d'; setTimeout(()=>{btn.textContent='✓';btn.style.background='';},1500); }
+  // Update header count
+  const predCount = Object.keys(p.predictions).length;
+  const subEl = document.querySelector(`#card-${pid} .player-card-sub`);
+  if (subEl) {
+    const score = playerScore(p);
+    subEl.textContent = `${p.team} · ${predCount}/${FIXTURES.length} predictions · ${score.total} pts`;
+  }
+}
+
+function saveAllPredsFor(pid) {
+  const p = state.players.find(pl => pl.id === pid);
+  if (!p) return;
+  if (!p.predictions) p.predictions = {};
+  let saved = 0;
+  FIXTURES.forEach(f => {
+    const h = document.getElementById(`pe-${pid}-h-${f.id}`)?.value;
+    const a = document.getElementById(`pe-${pid}-a-${f.id}`)?.value;
+    if (h!==undefined && a!==undefined && h!=='' && a!=='') {
+      p.predictions[f.id] = { home: h, away: a };
+      saved++;
+    }
+  });
+  saveLocal(); pushData();
+  const subEl = document.querySelector(`#card-${pid} .player-card-sub`);
+  if (subEl) {
+    const score = playerScore(p);
+    subEl.textContent = `${p.team} · ${Object.keys(p.predictions).length}/${FIXTURES.length} predictions · ${score.total} pts`;
+  }
+  toast(`Saved ${saved} predictions for ${p.name} ✓`);
+}
+
 function addPlayer() {
   const name = document.getElementById('new-name').value.trim();
   const team = document.getElementById('new-team').value.trim();
   const paid = document.getElementById('new-paid').checked;
   if (!name || !team) { toast('Name and team name required', 'error'); return; }
-  state.players.push({ id: Date.now().toString(), name, team, paid, predictions: {} });
+  const newId = Date.now().toString();
+  state.players.push({ id: newId, name, team, paid, predictions: {} });
   document.getElementById('new-name').value = '';
   document.getElementById('new-team').value = '';
   document.getElementById('new-paid').checked = false;
   saveLocal(); pushData();
   renderAdmin(); updateTopbar();
-  toast('Player added ✓');
+  // Auto-open the new player's card so predictions can be entered immediately
+  setTimeout(() => {
+    const card = document.getElementById('card-' + newId);
+    if (card) { card.scrollIntoView({ behavior: 'smooth', block: 'start' }); toggleCard(newId); }
+  }, 80);
+  toast('Player added – enter their predictions below ✓');
 }
 
 function removePlayer(id) {
-  if (!confirm('Remove this player?')) return;
-  state.players = state.players.filter(p => p.id !== id);
+  const p = state.players.find(pl => pl.id === id);
+  if (!confirm(`Remove ${p ? p.name : 'this player'} and all their predictions?`)) return;
+  state.players = state.players.filter(pl => pl.id !== id);
   if (activePredPlayer === id) activePredPlayer = null;
   saveLocal(); pushData();
-  renderAdmin(); updateTopbar();
+  renderAdmin(); renderStandings(); updateTopbar();
   toast('Player removed');
 }
 
@@ -1095,115 +1244,6 @@ function toast(msg, type='') {
 // ════════════════════════════════════════════════════════════
 // ADMIN PREDICTION ENTRY
 // ════════════════════════════════════════════════════════════
-function renderPredEntry() {
-  if (!isAdmin) return;
-  // Player tabs
-  const tabsEl = document.getElementById('pred-entry-player-tabs');
-  if (!tabsEl) return;
-  if (state.players.length === 0) {
-    tabsEl.innerHTML = '<p style="color:var(--muted);font-size:13px">Add players first.</p>';
-    document.getElementById('pred-entry-tbody').innerHTML = '';
-    return;
-  }
-  if (!activePredEntryPlayer) activePredEntryPlayer = state.players[0].id;
-  tabsEl.innerHTML = state.players.map(p =>
-    `<button class="pred-player-btn ${p.id===activePredEntryPlayer?'active':''}" onclick="setPredEntryPlayer('${p.id}')">${esc(p.name)}</button>`
-  ).join('');
-  renderPredEntryTable();
-}
-
-function setPredEntryPlayer(id) {
-  activePredEntryPlayer = id;
-  renderPredEntry();
-}
-
-function renderPredEntryTable() {
-  const player = state.players.find(p => p.id === activePredEntryPlayer);
-  if (!player) return;
-  const tbody = document.getElementById('pred-entry-tbody');
-  let html = '';
-  let lastGroup = null;
-  FIXTURES.forEach(f => {
-    if (f.g !== lastGroup) {
-      html += `<tr class="pred-group-header"><td colspan="6">Group ${f.g}</td></tr>`;
-      lastGroup = f.g;
-    }
-    const pred = player.predictions && player.predictions[f.id];
-    const r = state.results[f.id];
-    const pts = calcPts(pred, r);
-    let ptsHtml = '';
-    if (pts !== null) {
-      const col = pts===5?'#15803d':pts>0?'#1d4ed8':'#94a3b8';
-      ptsHtml = `<span style="color:${col};font-weight:700">${pts}</span>`;
-    }
-    const resultHtml = r ? `<span style="background:var(--green-bg);color:var(--green-text);padding:2px 6px;border-radius:4px;font-weight:700;font-size:12px">${r.home}–${r.away}</span>` : '<span style="color:var(--muted);font-size:11px">TBP</span>';
-    html += `<tr id="pred-row-${f.id}">
-      <td style="font-size:11px;color:var(--muted);white-space:nowrap">${f.date}<br>${f.time}</td>
-      <td style="font-weight:500">${FLAGS[f.home]||''} ${esc(f.home)} <span style="color:var(--muted)">vs</span> ${esc(f.away)} ${FLAGS[f.away]||''}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:3px">
-          <input class="pred-score-input" type="number" min="0" max="20" id="pe-h-${f.id}" value="${pred?.home??''}" placeholder="H" oninput="markUnsaved(${f.id})">
-          <span style="font-size:11px">–</span>
-          <input class="pred-score-input" type="number" min="0" max="20" id="pe-a-${f.id}" value="${pred?.away??''}" placeholder="A" oninput="markUnsaved(${f.id})">
-        </div>
-      </td>
-      <td>${resultHtml}</td>
-      <td class="pred-pts-cell">${ptsHtml}</td>
-      <td><button class="pred-save-btn" id="pe-btn-${f.id}" onclick="savePredEntry('${player.id}',${f.id})">Save</button></td>
-    </tr>`;
-  });
-  tbody.innerHTML = html;
-  document.getElementById('save-all-btn').style.display = 'none';
-  document.getElementById('pred-entry-status').textContent = `${Object.keys(player.predictions||{}).length} / ${FIXTURES.length} predictions entered`;
-}
-
-function markUnsaved(fid) {
-  const btn = document.getElementById('pe-btn-'+fid);
-  if (btn) { btn.textContent = 'Save*'; btn.style.background = '#b45309'; }
-  document.getElementById('save-all-btn').style.display = '';
-}
-
-function savePredEntry(pid, fid) {
-  const h = document.getElementById('pe-h-'+fid).value;
-  const a = document.getElementById('pe-a-'+fid).value;
-  if (h===''||a==='') { toast('Enter both scores for this fixture', 'error'); return; }
-  const p = state.players.find(pl => pl.id === pid);
-  if (!p) return;
-  if (!p.predictions) p.predictions = {};
-  p.predictions[fid] = { home: h, away: a };
-  saveLocal(); pushData();
-  // Update just this row's button and pts without full re-render
-  const btn = document.getElementById('pe-btn-'+fid);
-  if (btn) { btn.textContent = 'Saved ✓'; btn.style.background = '#15803d'; setTimeout(()=>{if(btn){btn.textContent='Save';btn.style.background='';}},2000); }
-  // Update points cell
-  const r = state.results[fid];
-  const pred = { home: h, away: a };
-  const pts = calcPts(pred, r);
-  const ptsCell = document.querySelector(`#pred-row-${fid} .pred-pts-cell`);
-  if (ptsCell && pts !== null) {
-    const col = pts===5?'#15803d':pts>0?'#1d4ed8':'#94a3b8';
-    ptsCell.innerHTML = `<span style="color:${col};font-weight:700">${pts}</span>`;
-  }
-  document.getElementById('pred-entry-status').textContent = `${Object.keys(p.predictions).length} / ${FIXTURES.length} predictions entered`;
-}
-
-function saveAllPreds() {
-  const player = state.players.find(p => p.id === activePredEntryPlayer);
-  if (!player) return;
-  let saved = 0;
-  FIXTURES.forEach(f => {
-    const h = document.getElementById('pe-h-'+f.id)?.value;
-    const a = document.getElementById('pe-a-'+f.id)?.value;
-    if (h!==undefined && a!==undefined && h!=='' && a!=='') {
-      if (!player.predictions) player.predictions = {};
-      player.predictions[f.id] = { home: h, away: a };
-      saved++;
-    }
-  });
-  saveLocal(); pushData();
-  renderPredEntryTable();
-  toast(`Saved ${saved} predictions ✓`);
-}
 
 // ════════════════════════════════════════════════════════════
 // INIT
