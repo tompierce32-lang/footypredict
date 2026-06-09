@@ -148,6 +148,19 @@
     .pts-badge { font-size: 16px; padding: 3px 10px; }
   }
 
+  /* ── Prediction entry grid ── */
+  .pred-entry-grid { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .pred-entry-grid th { background: var(--faint); padding: 6px 10px; text-align: left; font-weight: 600; font-size: 11px; color: var(--muted); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 1; }
+  .pred-entry-grid td { padding: 5px 8px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .pred-entry-grid tr:hover td { background: var(--faint); }
+  .pred-score-input { width: 38px; padding: 3px 4px; border: 1px solid var(--border); border-radius: 4px; font-size: 13px; text-align: center; }
+  .pred-save-btn { padding: 2px 8px; background: #064e3b; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 11px; }
+  .pred-save-btn:hover { background: #065f46; }
+  .pred-saved { font-size: 11px; color: var(--muted); }
+  .pred-pts-cell { font-size: 12px; font-weight: 700; min-width: 32px; }
+  .pred-group-header td { background: #064e3b; color: white; font-weight: 700; font-size: 11px; padding: 4px 10px; }
+  .pred-player-btn { padding: 5px 14px; border: 1px solid var(--border); border-radius: 20px; cursor: pointer; font-size: 12px; background: white; margin: 0 4px 6px 0; }
+  .pred-player-btn.active { background: #064e3b; color: white; border-color: #064e3b; font-weight: 600; }
   .hidden { display: none !important; }
   .toggle-section { cursor: pointer; user-select: none; }
   .toggle-section:hover { opacity: .8; }
@@ -309,6 +322,34 @@
     <details class="card" style="margin-bottom:12px" open>
       <summary>👥 All entrants</summary>
       <div style="margin-top:10px" id="admin-player-list"></div>
+    </details>
+
+    <!-- Enter Predictions (admin) -->
+    <details class="card" style="margin-bottom:12px" id="pred-entry-section">
+      <summary>🎯 Enter player predictions</summary>
+      <div style="margin-top:14px">
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px">Select a player then enter their predicted scores from their paper sheet. Each row auto-saves when you click Save.</p>
+        <div id="pred-entry-player-tabs" style="margin-bottom:12px;display:flex;flex-wrap:wrap;gap:0"></div>
+        <div id="pred-entry-table-wrap" style="overflow-x:auto;max-height:520px;overflow-y:auto;border:1px solid var(--border);border-radius:8px">
+          <table class="pred-entry-grid" id="pred-entry-table">
+            <thead>
+              <tr>
+                <th style="min-width:60px">Date</th>
+                <th style="min-width:180px">Fixture</th>
+                <th style="min-width:80px">Prediction</th>
+                <th style="min-width:70px">Result</th>
+                <th style="min-width:36px">Pts</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody id="pred-entry-tbody"></tbody>
+          </table>
+        </div>
+        <div style="margin-top:8px;display:flex;gap:8px;align-items:center">
+          <button class="btn btn-primary" onclick="saveAllPreds()" id="save-all-btn" style="display:none">💾 Save all unsaved</button>
+          <span id="pred-entry-status" style="font-size:12px;color:var(--muted)"></span>
+        </div>
+      </div>
     </details>
 
     <!-- Bulk mark paid -->
@@ -548,6 +589,7 @@ let activeTab = 'standings';
 let activeFxGroup = 'A';
 let activePredGroup = 'A';
 let activePredPlayer = null;
+let activePredEntryPlayer = null;
 
 // ════════════════════════════════════════════════════════════
 // CLOUDFLARE SYNC
@@ -740,6 +782,7 @@ function setAdmin(v) {
   badge.className = v ? 'admin' : 'public';
   const footer = document.getElementById('public-footer');
   if (footer) footer.style.display = v ? 'none' : '';
+  if (v) renderPredEntry();
 }
 
 // ════════════════════════════════════════════════════════════
@@ -757,7 +800,7 @@ function renderTab(tab) {
   if (tab === 'standings') renderStandings();
   if (tab === 'fixtures') renderFixtures();
   if (tab === 'predictions') renderPredictions();
-  if (tab === 'admin') renderAdmin();
+  if (tab === 'admin') { renderAdmin(); renderPredEntry(); }
 }
 function render() {
   renderTab(activeTab);
@@ -1047,6 +1090,119 @@ function toast(msg, type='') {
   el.className = 'show' + (type ? ' ' + type : '');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ════════════════════════════════════════════════════════════
+// ADMIN PREDICTION ENTRY
+// ════════════════════════════════════════════════════════════
+function renderPredEntry() {
+  if (!isAdmin) return;
+  // Player tabs
+  const tabsEl = document.getElementById('pred-entry-player-tabs');
+  if (!tabsEl) return;
+  if (state.players.length === 0) {
+    tabsEl.innerHTML = '<p style="color:var(--muted);font-size:13px">Add players first.</p>';
+    document.getElementById('pred-entry-tbody').innerHTML = '';
+    return;
+  }
+  if (!activePredEntryPlayer) activePredEntryPlayer = state.players[0].id;
+  tabsEl.innerHTML = state.players.map(p =>
+    `<button class="pred-player-btn ${p.id===activePredEntryPlayer?'active':''}" onclick="setPredEntryPlayer('${p.id}')">${esc(p.name)}</button>`
+  ).join('');
+  renderPredEntryTable();
+}
+
+function setPredEntryPlayer(id) {
+  activePredEntryPlayer = id;
+  renderPredEntry();
+}
+
+function renderPredEntryTable() {
+  const player = state.players.find(p => p.id === activePredEntryPlayer);
+  if (!player) return;
+  const tbody = document.getElementById('pred-entry-tbody');
+  let html = '';
+  let lastGroup = null;
+  FIXTURES.forEach(f => {
+    if (f.g !== lastGroup) {
+      html += `<tr class="pred-group-header"><td colspan="6">Group ${f.g}</td></tr>`;
+      lastGroup = f.g;
+    }
+    const pred = player.predictions && player.predictions[f.id];
+    const r = state.results[f.id];
+    const pts = calcPts(pred, r);
+    let ptsHtml = '';
+    if (pts !== null) {
+      const col = pts===5?'#15803d':pts>0?'#1d4ed8':'#94a3b8';
+      ptsHtml = `<span style="color:${col};font-weight:700">${pts}</span>`;
+    }
+    const resultHtml = r ? `<span style="background:var(--green-bg);color:var(--green-text);padding:2px 6px;border-radius:4px;font-weight:700;font-size:12px">${r.home}–${r.away}</span>` : '<span style="color:var(--muted);font-size:11px">TBP</span>';
+    html += `<tr id="pred-row-${f.id}">
+      <td style="font-size:11px;color:var(--muted);white-space:nowrap">${f.date}<br>${f.time}</td>
+      <td style="font-weight:500">${FLAGS[f.home]||''} ${esc(f.home)} <span style="color:var(--muted)">vs</span> ${esc(f.away)} ${FLAGS[f.away]||''}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:3px">
+          <input class="pred-score-input" type="number" min="0" max="20" id="pe-h-${f.id}" value="${pred?.home??''}" placeholder="H" oninput="markUnsaved(${f.id})">
+          <span style="font-size:11px">–</span>
+          <input class="pred-score-input" type="number" min="0" max="20" id="pe-a-${f.id}" value="${pred?.away??''}" placeholder="A" oninput="markUnsaved(${f.id})">
+        </div>
+      </td>
+      <td>${resultHtml}</td>
+      <td class="pred-pts-cell">${ptsHtml}</td>
+      <td><button class="pred-save-btn" id="pe-btn-${f.id}" onclick="savePredEntry('${player.id}',${f.id})">Save</button></td>
+    </tr>`;
+  });
+  tbody.innerHTML = html;
+  document.getElementById('save-all-btn').style.display = 'none';
+  document.getElementById('pred-entry-status').textContent = `${Object.keys(player.predictions||{}).length} / ${FIXTURES.length} predictions entered`;
+}
+
+function markUnsaved(fid) {
+  const btn = document.getElementById('pe-btn-'+fid);
+  if (btn) { btn.textContent = 'Save*'; btn.style.background = '#b45309'; }
+  document.getElementById('save-all-btn').style.display = '';
+}
+
+function savePredEntry(pid, fid) {
+  const h = document.getElementById('pe-h-'+fid).value;
+  const a = document.getElementById('pe-a-'+fid).value;
+  if (h===''||a==='') { toast('Enter both scores for this fixture', 'error'); return; }
+  const p = state.players.find(pl => pl.id === pid);
+  if (!p) return;
+  if (!p.predictions) p.predictions = {};
+  p.predictions[fid] = { home: h, away: a };
+  saveLocal(); pushData();
+  // Update just this row's button and pts without full re-render
+  const btn = document.getElementById('pe-btn-'+fid);
+  if (btn) { btn.textContent = 'Saved ✓'; btn.style.background = '#15803d'; setTimeout(()=>{if(btn){btn.textContent='Save';btn.style.background='';}},2000); }
+  // Update points cell
+  const r = state.results[fid];
+  const pred = { home: h, away: a };
+  const pts = calcPts(pred, r);
+  const ptsCell = document.querySelector(`#pred-row-${fid} .pred-pts-cell`);
+  if (ptsCell && pts !== null) {
+    const col = pts===5?'#15803d':pts>0?'#1d4ed8':'#94a3b8';
+    ptsCell.innerHTML = `<span style="color:${col};font-weight:700">${pts}</span>`;
+  }
+  document.getElementById('pred-entry-status').textContent = `${Object.keys(p.predictions).length} / ${FIXTURES.length} predictions entered`;
+}
+
+function saveAllPreds() {
+  const player = state.players.find(p => p.id === activePredEntryPlayer);
+  if (!player) return;
+  let saved = 0;
+  FIXTURES.forEach(f => {
+    const h = document.getElementById('pe-h-'+f.id)?.value;
+    const a = document.getElementById('pe-a-'+f.id)?.value;
+    if (h!==undefined && a!==undefined && h!=='' && a!=='') {
+      if (!player.predictions) player.predictions = {};
+      player.predictions[f.id] = { home: h, away: a };
+      saved++;
+    }
+  });
+  saveLocal(); pushData();
+  renderPredEntryTable();
+  toast(`Saved ${saved} predictions ✓`);
 }
 
 // ════════════════════════════════════════════════════════════
