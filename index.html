@@ -296,6 +296,21 @@
     <!-- Stats -->
     <div class="stat-grid" id="admin-stats-grid"></div>
 
+    <!-- Self-entry link card -->
+    <div class="card" style="margin-bottom:14px;background:#f0fdf4;border-color:#86efac">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <div style="font-weight:600;font-size:14px;color:#14532d">🔗 Player self-entry form</div>
+          <div style="font-size:12px;color:#166534;margin-top:2px">Share this link with staff so they can enter their own predictions</div>
+          <div style="font-size:12px;font-family:monospace;margin-top:4px;color:#14532d;word-break:break-all" id="predict-link"></div>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="btn" onclick="copyPredictLink()" style="font-size:12px;padding:6px 12px;border-color:#86efac;color:#14532d">📋 Copy link</button>
+          <a id="predict-link-btn" href="predict.html" target="_blank" class="btn btn-primary" style="font-size:12px;padding:6px 12px;text-decoration:none">Open form ↗</a>
+        </div>
+      </div>
+    </div>
+
     <!-- Add new entrant form -->
     <div class="card" style="margin-bottom:14px">
       <div style="font-weight:600;font-size:14px;margin-bottom:12px">➕ Add new entrant</div>
@@ -1239,6 +1254,26 @@ function importCSV() {
 }
 
 // ════════════════════════════════════════════════════════════
+// SELF-ENTRY LINK
+// ════════════════════════════════════════════════════════════
+function copyPredictLink() {
+  const base = window.location.href.replace(/[^/]*$/, '');
+  const link = base + 'predict.html';
+  navigator.clipboard.writeText(link).then(() => {
+    toast('Link copied to clipboard ✓');
+  }).catch(() => {
+    // Fallback for older browsers
+    const ta = document.createElement('textarea');
+    ta.value = link;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    toast('Link copied ✓');
+  });
+}
+
+// ════════════════════════════════════════════════════════════
 // EXCEL EXPORT
 // ════════════════════════════════════════════════════════════
 function exportToExcel() {
@@ -1412,6 +1447,16 @@ showTab('standings');
 
 // Auto-sync on load
 syncData();
+
+// Set self-entry link
+(function() {
+  const base = window.location.href.replace(/[^/]*$/, '');
+  const link = base + 'predict.html';
+  const el = document.getElementById('predict-link');
+  if (el) el.textContent = link;
+  const btn = document.getElementById('predict-link-btn');
+  if (btn) btn.href = link;
+})();
 </script>
 </body>
 </html>
