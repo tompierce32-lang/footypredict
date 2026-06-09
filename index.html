@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Staff World Cup 2026 – Prediction League</title>
 <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
 <style>
   :root {
     --green: #15803d; --green-bg: #dcfce7; --green-text: #14532d;
@@ -347,15 +348,22 @@
     <div style="font-weight:600;font-size:15px;margin-bottom:10px">👥 All entrants <span id="entrant-count" style="font-size:12px;color:var(--muted);font-weight:400"></span></div>
     <div id="admin-player-list"></div>
 
-    <!-- Backup to Excel -->
+    <!-- Backup -->
     <div class="card" style="margin-bottom:14px;margin-top:14px">
-      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
-        <div>
-          <div style="font-weight:600;font-size:14px">📊 Backup to Excel</div>
-          <div style="font-size:12px;color:var(--muted);margin-top:2px">Downloads all players, predictions and results as an .xlsx file</div>
-        </div>
-        <button class="btn btn-primary" onclick="exportToExcel()" id="export-btn">⬇ Download backup</button>
+      <div style="font-weight:600;font-size:14px;margin-bottom:4px">💾 Backup data</div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:12px">Download all players, predictions, results and points as formatted documents</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-primary" onclick="exportToExcel()" id="export-btn" style="display:flex;align-items:center;gap:6px">
+          <span>📊</span> Download Excel (.xlsx)
+        </button>
+        <button class="btn btn-primary" onclick="exportToWord()" id="export-word-btn" style="display:flex;align-items:center;gap:6px;background:#1d4ed8;border-color:#1d4ed8">
+          <span>📄</span> Download Word (.docx)
+        </button>
+        <button class="btn" onclick="exportBoth()" id="export-both-btn" style="font-size:13px">
+          ⬇ Download both
+        </button>
       </div>
+      <div id="backup-status" style="margin-top:8px;font-size:12px;color:var(--muted);display:none"></div>
     </div>
 
     <!-- Bulk mark paid -->
@@ -1252,6 +1260,197 @@ function importCSV() {
   saveLocal(); pushData();
   renderAdmin(); updateTopbar();
   toast(`Imported ${added} player(s)${skipped ? `, ${skipped} skipped` : ''} ✓`);
+}
+
+// ════════════════════════════════════════════════════════════
+// WORD EXPORT
+// ════════════════════════════════════════════════════════════
+function exportToWord() {
+  const btn = document.getElementById('export-word-btn');
+  const status = document.getElementById('backup-status');
+  btn.textContent = '⏳ Building...'; btn.disabled = true;
+  status.style.display=''; status.textContent='Building Word document...';
+  try {
+    const {
+      Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+      AlignmentType, BorderStyle, WidthType, ShadingType, VerticalAlign,
+      PageNumber, Header, Footer, ImageRun, PageBreak
+    } = docx;
+
+    const paid  = state.players.filter(p=>p.paid).length;
+    const pot   = paid * 3;
+    const today = new Date().toLocaleDateString('en-GB',{day:'2-digit',month:'long',year:'numeric'});
+    const ranked = state.players
+      .map(p=>({...p,...playerScore(p),predCount:Object.keys(p.predictions||{}).length}))
+      .sort((a,b)=>b.total-a.total);
+
+    const DG="064E3B",MG="065F46",LG="D1FAE5",GD="FEF3C7",BL="DBEAFE",GR="F1F5F9",RD="FEE2E2";
+    const bdr=(c="CBD5E1")=>({style:BorderStyle.SINGLE,size:4,color:c});
+    const allB=(c="CBD5E1")=>({top:bdr(c),bottom:bdr(c),left:bdr(c),right:bdr(c)});
+
+    function hCell(text,w,bg=DG,sz=17,color="FFFFFF",bold=true,align=AlignmentType.CENTER){
+      return new TableCell({width:{size:w,type:WidthType.DXA},shading:{fill:bg,type:ShadingType.CLEAR},
+        borders:allB(DG),margins:{top:60,bottom:60,left:80,right:80},verticalAlign:VerticalAlign.CENTER,
+        children:[new Paragraph({alignment:align,children:[new TextRun({text:String(text??''),font:"Arial",size:sz,color,bold})]})]});
+    }
+    function dCell(text,w,bg="FFFFFF",sz=17,color="0F172A",bold=false,align=AlignmentType.LEFT){
+      return new TableCell({width:{size:w,type:WidthType.DXA},shading:{fill:bg,type:ShadingType.CLEAR},
+        borders:allB("CBD5E1"),margins:{top:50,bottom:50,left:80,right:80},verticalAlign:VerticalAlign.CENTER,
+        children:[new Paragraph({alignment:align,children:[new TextRun({text:String(text??''),font:"Arial",size:sz,color,bold})]})]});
+    }
+    function sec(text){
+      return new Paragraph({spacing:{before:240,after:120},
+        children:[new TextRun({text,font:"Arial",size:28,bold:true,color:DG})]});
+    }
+    function sp(){return new Paragraph({spacing:{before:0,after:80},children:[]});}
+
+    const children=[];
+    const medals=["🥇","🥈","🥉"];
+
+    // Cover
+    children.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{before:360,after:120},
+      children:[new TextRun({text:"BANK VIEW STAFF",font:"Arial",size:52,bold:true,color:DG})]}));
+    children.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{before:0,after:120},
+      children:[new TextRun({text:"WORLD CUP 2026",font:"Arial",size:48,bold:true,color:"B45309"})]}));
+    children.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{before:0,after:120},
+      children:[new TextRun({text:"Prediction League — Full Backup Report",font:"Arial",size:24,italic:true,color:"64748B"})]}));
+    children.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{before:0,after:480},
+      children:[new TextRun({text:`Generated: ${today}  |  Entrants: ${state.players.length}  |  Entry Pot: £${pot}`,font:"Arial",size:20,color:"64748B"})]}));
+    children.push(new Paragraph({children:[new PageBreak()]}));
+
+    // Section 1: Leaderboard
+    children.push(sec("1.  League Standings"));
+    const lbW=[600,2600,2300,900,1000,900,1000,1400];
+    children.push(new Table({width:{size:9700,type:WidthType.DXA},columnWidths:lbW,rows:[
+      new TableRow({tableHeader:true,children:["Pos","Player Name","Team Name","Paid","Points","Exact","Results","Predictions"].map((h,i)=>hCell(h,lbW[i]))}),
+      ...ranked.map((p,i)=>{
+        const bg=i===0?GD:(i%2===0?GR:"FFFFFF");
+        const fc=i===0?"B45309":"0F172A";
+        const vals=[medals[i]||`#${i+1}`,p.name,p.team,p.paid?"✓ Paid":"✗ Unpaid",p.total,p.exact,p.res,`${p.predCount}/72`];
+        const fcs=[fc,fc,fc,p.paid?"065F46":"991B1B",i===0?"B45309":"1D4ED8","0F172A","0F172A","0F172A"];
+        const bolds=[i===0,i===0,false,true,true,false,false,false];
+        const aligns=[AlignmentType.CENTER,AlignmentType.LEFT,AlignmentType.LEFT,AlignmentType.CENTER,AlignmentType.CENTER,AlignmentType.CENTER,AlignmentType.CENTER,AlignmentType.CENTER];
+        return new TableRow({children:vals.map((v,ci)=>dCell(v,lbW[ci],bg,i===0?19:17,fcs[ci],bolds[ci],aligns[ci]))});
+      })
+    ]}));
+    children.push(sp());
+
+    // Section 2: Results
+    children.push(new Paragraph({children:[new PageBreak()]}));
+    children.push(sec("2.  Match Results"));
+    const rW=[500,800,1000,2000,700,900,2000,1400,600];
+    const rH=["#","Group","Date","Home Team","Goals","Score","Away Team","Result","Status"];
+    const rRows=[new TableRow({tableHeader:true,children:rH.map((h,i)=>hCell(h,rW[i]))})];
+    let lastG=null;
+    for (const f of FIXTURES) {
+      if (f.g!==lastG) {
+        lastG=f.g;
+        rRows.push(new TableRow({children:[new TableCell({columnSpan:9,
+          width:{size:rW.reduce((a,b)=>a+b,0),type:WidthType.DXA},
+          shading:{fill:MG,type:ShadingType.CLEAR},borders:allB(MG),
+          margins:{top:60,bottom:60,left:120,right:120},verticalAlign:VerticalAlign.CENTER,
+          children:[new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:`GROUP ${f.g}`,font:"Arial",size:18,bold:true,color:"FFFFFF"})]})]})]
+        }));
+      }
+      const r=state.results[f.id]||state.results[String(f.id)];
+      const bg=r?LG:(FIXTURES.indexOf(f)%2===0?GR:"FFFFFF");
+      const hg=r?parseInt(r.home):null, ag=r?parseInt(r.away):null;
+      const win=r?(hg>ag?f.home+" Win":hg<ag?f.away+" Win":"Draw"):"";
+      const scoreStr=r?`${hg} – ${ag}`:"TBP";
+      rRows.push(new TableRow({children:[
+        dCell(f.id,rW[0],bg,16,"0F172A",false,AlignmentType.CENTER),
+        dCell(`Grp ${f.g}`,rW[1],bg,16,"0F172A",false,AlignmentType.CENTER),
+        dCell(`${f.date} ${f.time}`,rW[2],bg,16,"0F172A",false,AlignmentType.CENTER),
+        dCell(f.home,rW[3],bg,16,"0F172A",true,AlignmentType.LEFT),
+        dCell(r?String(hg):"",rW[4],bg,16,r?"065F46":"94A3B8",!!r,AlignmentType.CENTER),
+        dCell(scoreStr,rW[5],r?LG:bg,18,r?"065F46":"94A3B8",!!r,AlignmentType.CENTER),
+        dCell(f.away,rW[6],bg,16,"0F172A",true,AlignmentType.LEFT),
+        dCell(win,rW[7],bg,16,r?"065F46":"94A3B8",!!r,AlignmentType.LEFT),
+        dCell(r?"✓ Final":"Upcoming",rW[8],bg,15,r?"065F46":"94A3B8",false,AlignmentType.CENTER),
+      ]}));
+    }
+    children.push(new Table({width:{size:rW.reduce((a,b)=>a+b,0),type:WidthType.DXA},columnWidths:rW,rows:rRows}));
+    children.push(sp());
+
+    // Section 3: Per-player predictions
+    children.push(new Paragraph({children:[new PageBreak()]}));
+    children.push(sec("3.  Player Predictions & Points"));
+    const pW=[700,2600,1000,1000,900,600];
+    const pH=["Group","Fixture","Predicted","Actual","Points","★"];
+    for (const [pi,p] of ranked.entries()) {
+      children.push(new Paragraph({spacing:{before:200,after:80},children:[
+        new TextRun({text:`${pi+1}.  ${p.name}`,font:"Arial",size:24,bold:true,color:DG}),
+        new TextRun({text:`  —  ${p.team}  |  ${p.paid?"Paid ✓":"Unpaid ✗"}  |  ${p.total} pts  |  ${p.predCount}/72 predictions`,font:"Arial",size:18,color:"64748B"}),
+      ]}));
+      const pRows=[new TableRow({tableHeader:true,children:pH.map((h,i)=>hCell(h,pW[i],MG,16))})];
+      for (const f of FIXTURES) {
+        const pred=(p.predictions||{})[f.id]||(p.predictions||{})[String(f.id)];
+        const r=state.results[f.id]||state.results[String(f.id)];
+        const pts=calcPts(pred,r);
+        if (!pred&&!r) continue;
+        const bg=pts===5?LG:pts>0?BL:"FFFFFF";
+        pRows.push(new TableRow({children:[
+          dCell(`Grp ${f.g}`,pW[0],bg,16,"0F172A",false,AlignmentType.CENTER),
+          dCell(`${f.home} v ${f.away}`,pW[1],bg,16,"0F172A",false,AlignmentType.LEFT),
+          dCell(pred?`${pred.home}-${pred.away}`:"—",pW[2],bg,16,"0F172A",false,AlignmentType.CENTER),
+          dCell(r?`${r.home}-${r.away}`:"TBP",pW[3],r?LG:bg,16,r?"065F46":"94A3B8",pts===5,AlignmentType.CENTER),
+          dCell(pts!==null?String(pts):"",pW[4],bg,18,pts===5?"065F46":pts>0?"1D4ED8":"94A3B8",pts===5,AlignmentType.CENTER),
+          dCell(pts===5?"★":pts>0?"✓":"",pW[5],bg,18,pts===5?"B45309":"065F46",pts===5,AlignmentType.CENTER),
+        ]}));
+      }
+      children.push(new Table({width:{size:pW.reduce((a,b)=>a+b,0),type:WidthType.DXA},columnWidths:pW,rows:pRows}));
+      if (pi<ranked.length-1) children.push(sp());
+    }
+
+    // Section 4: Payments
+    children.push(new Paragraph({children:[new PageBreak()]}));
+    children.push(sec("4.  Payment Summary"));
+    const outstanding=(state.players.length-paid)*3;
+    const pyW=[500,2600,2200,1200,1100];
+    children.push(new Table({width:{size:7600,type:WidthType.DXA},columnWidths:pyW,rows:[
+      new TableRow({tableHeader:true,children:["#","Name","Team","Status","Amount Due"].map((h,i)=>hCell(h,pyW[i]))}),
+      ...state.players.map((p,i)=>new TableRow({children:[
+        dCell(i+1,pyW[0],i%2===0?GR:"FFFFFF",17,"0F172A",false,AlignmentType.CENTER),
+        dCell(p.name,pyW[1],i%2===0?GR:"FFFFFF"),
+        dCell(p.team,pyW[2],i%2===0?GR:"FFFFFF"),
+        dCell(p.paid?"✓ Paid":"✗ Unpaid",pyW[3],i%2===0?GR:"FFFFFF",17,p.paid?"065F46":"991B1B",true,AlignmentType.CENTER),
+        dCell(p.paid?"£0":"£3",pyW[4],i%2===0?GR:"FFFFFF",17,p.paid?"065F46":"991B1B",false,AlignmentType.CENTER),
+      ]})),
+      new TableRow({children:[dCell("",pyW[0]),dCell("",pyW[1]),dCell("Total collected",pyW[2],LG,17,"065F46",true,AlignmentType.RIGHT),dCell(`£${pot}`,pyW[3],LG,20,"065F46",true,AlignmentType.CENTER),dCell("",pyW[4],LG)]}),
+      new TableRow({children:[dCell("",pyW[0]),dCell("",pyW[1]),dCell("Outstanding",pyW[2],RD,17,"991B1B",true,AlignmentType.RIGHT),dCell(`£${outstanding}`,pyW[3],RD,20,"991B1B",true,AlignmentType.CENTER),dCell("",pyW[4],RD)]}),
+    ]}));
+
+    const doc = new Document({
+      sections:[{
+        properties:{page:{size:{width:11906,height:16838},margin:{top:1080,bottom:1080,left:1080,right:1080}}},
+        headers:{default:new Header({children:[new Paragraph({alignment:AlignmentType.RIGHT,children:[new TextRun({text:"Bank View Staff World Cup 2026 – Prediction League Backup",font:"Arial",size:16,color:"94A3B8"})]})]}),},
+        footers:{default:new Footer({children:[new Paragraph({alignment:AlignmentType.CENTER,children:[new TextRun({text:`Generated ${today}  |  Page `,font:"Arial",size:16,color:"94A3B8"}),new TextRun({children:[PageNumber.CURRENT],font:"Arial",size:16,color:"94A3B8"}),new TextRun({text:" of ",font:"Arial",size:16,color:"94A3B8"}),new TextRun({children:[PageNumber.TOTAL_PAGES],font:"Arial",size:16,color:"94A3B8"})]})]})},
+        children
+      }]
+    });
+
+    Packer.toBlob(doc).then(blob=>{
+      const a=document.createElement('a');
+      a.href=URL.createObjectURL(blob);
+      a.download=`WC2026_PredictionLeague_Backup_${new Date().toISOString().slice(0,10)}.docx`;
+      a.click();
+      btn.textContent='📄 Download Word (.docx)'; btn.disabled=false;
+      btn.style.background=''; btn.style.borderColor='';
+      status.textContent='Word doc downloaded ✓'; 
+      setTimeout(()=>{status.style.display='none';},3000);
+      toast('Word backup downloaded ✓');
+    });
+  } catch(e) {
+    btn.textContent='📄 Download Word (.docx)'; btn.disabled=false;
+    status.style.display='none';
+    toast('Word export failed: '+e.message,'error');
+    console.error(e);
+  }
+}
+
+function exportBoth() {
+  exportToExcel();
+  setTimeout(exportToWord, 800);
 }
 
 // ════════════════════════════════════════════════════════════
